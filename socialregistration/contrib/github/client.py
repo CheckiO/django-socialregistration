@@ -3,7 +3,10 @@ from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth2
 from socialregistration.settings import SESSION_KEY
+import httplib2
 import json
+
+TIMEOUT = getattr(settings, 'SOCIALREGISTRATION_SOCKET_TIMEOUT', 5)
 
 
 class Github(OAuth2):
@@ -32,3 +35,7 @@ class Github(OAuth2):
     @staticmethod
     def get_session_key():
         return '%sgithub' % SESSION_KEY
+
+    def client(self):
+        ca_certs = getattr(settings, 'HTTPLIB2_CA_CERTS', None)
+        return httplib2.Http(ca_certs=ca_certs, timeout=TIMEOUT, disable_ssl_certificate_validation=True)

@@ -28,7 +28,7 @@ class LinkedIn(OAuth):
     def get_user_info(self):
         if self._user_info is None:
             self._user_info = json.loads(
-                self.request("http://api.linkedin.com/v1/people/~:(id)?format=json"))
+                self.request("http://api.linkedin.com/v1/people/~:public?format=json"))
             
         return self._user_info
 
