@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
-from socialregistration.clients.oauth import OAuth
+from socialregistration.clients.oauth import OAuth, OAuthError
 from socialregistration.settings import SESSION_KEY
 import json
 import urlparse
@@ -27,9 +27,13 @@ class LinkedIn(OAuth):
     
     def get_user_info(self):
         if self._user_info is None:
-            self._user_info = json.loads(
-                self.request("http://api.linkedin.com/v1/people/~:public?format=json"))
-            
+            try:
+                self._user_info = json.loads(
+                    self.request("http://api.linkedin.com/v1/people/~:public?format=json"))
+            except OAuthError:
+                self._user_info = json.loads(
+                    self.request("http://api.linkedin.com/v1/people/~:(id)?format=json"))
+
         return self._user_info
 
     @staticmethod
