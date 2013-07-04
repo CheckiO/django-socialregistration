@@ -6,6 +6,7 @@ from socialregistration.contrib.openid.client import OpenIDClient
 from socialregistration.contrib.openid.models import OpenIDProfile
 from socialregistration.mixins import SocialRegistration
 from socialregistration.views import SetupCallback
+from openid.consumer.discover import DiscoveryFailure
 
 class OpenIDRedirect(SocialRegistration, View):
     client = OpenIDClient
@@ -20,8 +21,10 @@ class OpenIDRedirect(SocialRegistration, View):
             request.POST.get('openid_provider'))
         
         request.session[self.get_client().get_session_key()] = client
-        
-        return HttpResponseRedirect(client.get_redirect_url())
+        try:
+            return HttpResponseRedirect(client.get_redirect_url())
+        except DiscoveryFailure, ex:
+            return self.error_to_response(request, {'error': ex.message})
 
 class OpenIDCallback(SocialRegistration, View):
     template_name = 'socialregistration/openid/openid.html'
